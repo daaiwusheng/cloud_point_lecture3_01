@@ -4,6 +4,7 @@ import numpy as np
 from numpy import *
 import pylab
 import random,math
+import KMeans
 
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
@@ -12,20 +13,50 @@ plt.style.use('seaborn')
 
 class GMM(object):
     def __init__(self, n_clusters, max_iter=50):
+        super(GMM, self).__init__()
         self.n_clusters = n_clusters
         self.max_iter = max_iter
+        self.Mu = None
+        self.Var = None
+        self.Pi = None
+        self.W = None
+        self.fitted = False
     
     # 屏蔽开始
     # 更新W
-    
+    def update_W(self, data, Mu, Var, Pi):
+        n_points = len(data)
+        pdfs = np.zeros((n_points, self.n_clusters))
+        for i in range(self.n_clusters):
+            pdfs[:, i] = Pi[i] * multivariate_normal.pdf(data, Mu[i], np.diag(Var[i]))
+        W = pdfs / pdfs.sum(axis=1).reshape(-1,1)
+        return W
+
+    # 计算W
+    def calculate_W(self, data):
+        n_points = len(data)
+        pdfs = np.zeros((n_points, self.n_clusters))
+        for i in range(self.n_clusters):
+            pdfs[:, i] = self.Pi[i] * multivariate_normal.pdf(data, self.Mu[i], np.diag(self.Var[i]))
+        W = pdfs / pdfs.sum(axis=1).reshape(-1, 1)
+        return W
 
     # 更新pi
- 
+    def update_Pi(self, W):
+        Pi = W.sum(axis=0) / W.sum()
+        return Pi
         
     # 更新Mu
-
+    def update_Mu(self, W, Mu, data):
+        for i in range(Mu.shape[0]):
+            Mu[i] = np.average(data, axis=0, weights=W[:, i])
+        return Mu
 
     # 更新Var
+    def update_Var(self, data, W, Mu, Var):
+        for i in range(Var.shape[0]):
+            Var[i] = np.average((data - Mu[i]) ** 2, axis=0, weights=W[:, i])
+        return Var
 
 
     # 屏蔽结束
@@ -33,13 +64,30 @@ class GMM(object):
     def fit(self, data):
         # 作业3
         # 屏蔽开始
+        k_means = KMeans.K_Means(n_clusters=self.n_clusters)
+        k_means.fit(data)
+        self.Mu = np.asarray(k_means.centers_)
+        self.Var = np.asarray([np.eye(data.shape[1])] * self.n_clusters)
+        self.Pi = np.asarray([1/self.n_clusters] * self.n_clusters).reshape(self.n_clusters, 1)
+        self.W = np.zeros((data.shape[0], self.n_clusters))
 
-
+        for i in range(self.max_iter):
+            self.W = self.update_W(data,self.Mu,self.Var,self.Pi)
+            self.Pi = self.update_Pi(self.W)
+            self.Mu = self.update_Mu(self.W, self.Mu, data)
+            self.Var = self.update_Var(data, self.W, self.Mu, self.Var)
+        self.fitted = True
         # 屏蔽结束
     
     def predict(self, data):
         # 屏蔽开始
-
+        result = []
+        if not self.fitted:
+            print("not fitted, please fit it first")
+            return result
+        post = self.calculate_W(data)
+        result = np.argmax(post, axis=1)
+        return result
         # 屏蔽结束
 
 # 生成仿真数据
