@@ -17,6 +17,7 @@ from itertools import cycle, islice
 
 from KMeans import K_Means
 from GMM import GMM
+from GMM_second import GMM_second
 
 np.random.seed(0)
 
@@ -105,7 +106,10 @@ for i_dataset, (dataset, algo_params) in enumerate(datasets):
     # 自编的K-Means、GMM算法
     my_kmeans = K_Means(n_clusters=params['n_clusters'])
     my_gmm = GMM(n_clusters=params['n_clusters'])
+    my_gmm_2 = GMM_second(n_clusters=params['n_clusters'])
     # sklearn中自带的算法
+    Offical_KMeans = cluster.KMeans(n_clusters=params['n_clusters'])
+    Offical_GMM = mixture.GaussianMixture(n_components=params['n_clusters'])
     ms = cluster.MeanShift(bandwidth=bandwidth, bin_seeding=True)
     two_means = cluster.MiniBatchKMeans(n_clusters=params['n_clusters'])
     ward = cluster.AgglomerativeClustering(
@@ -129,17 +133,20 @@ for i_dataset, (dataset, algo_params) in enumerate(datasets):
     
     clustering_algorithms = (
         ('My_KMeans', my_kmeans),
+        ('KMeans', Offical_KMeans),
         ('My_GMM', my_gmm),
-        ('MiniBatchKMeans', two_means),
-        ('AffinityPropagation', affinity_propagation),
-        ('MeanShift', ms),
+        ('My_GMM_2', my_gmm_2),
+        ('GMM', Offical_GMM),
         ('SpectralClustering', spectral),
-        ('Ward', ward),
-        ('AgglomerativeClustering', average_linkage),
-        ('DBSCAN', dbscan),
-        ('OPTICS', optics),
-        ('Birch', birch),
-        ('GaussianMixture', gmm)
+        # ('MiniBatchKMeans', two_means),
+        # ('AffinityPropagation', affinity_propagation),
+        # ('MeanShift', ms),
+        # ('Ward', ward),
+        # ('AgglomerativeClustering', average_linkage),
+        # ('DBSCAN', dbscan),
+        # ('OPTICS', optics),
+        # ('Birch', birch),
+        # ('GaussianMixture', gmm)
     )
 
     # 此处是内层循环，遍历每种算法
