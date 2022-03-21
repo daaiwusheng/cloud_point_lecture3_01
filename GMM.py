@@ -59,6 +59,7 @@ class GMM(object):
     def update_Var(self, data, W, Mu, Var):
         Nk = self.W.sum(axis=0)
         for i in range(self.n_clusters):
+            # 注意这里是需要的是协方差矩阵
             Var[i] = np.dot((data - Mu[i]).T, np.dot(np.diag(W[:, i]), data - Mu[i])) / Nk[i]
         return Var
 
