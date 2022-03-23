@@ -18,6 +18,7 @@ from itertools import cycle, islice
 from KMeans import K_Means
 from GMM import GMM
 from GMM_second import GMM_second
+from SpectralCluster import SpectralCluster
 
 np.random.seed(0)
 
@@ -107,6 +108,7 @@ for i_dataset, (dataset, algo_params) in enumerate(datasets):
     my_kmeans = K_Means(n_clusters=params['n_clusters'])
     my_gmm = GMM(n_clusters=params['n_clusters'])
     my_gmm_2 = GMM_second(n_clusters=params['n_clusters'])
+    my_spectral_cluster = SpectralCluster(n_clusters=params['n_clusters'])
     # sklearn中自带的算法
     Offical_KMeans = cluster.KMeans(n_clusters=params['n_clusters'])
     Offical_GMM = mixture.GaussianMixture(n_components=params['n_clusters'])
@@ -137,6 +139,7 @@ for i_dataset, (dataset, algo_params) in enumerate(datasets):
         ('My_GMM', my_gmm),
         ('My_GMM_2', my_gmm_2),
         ('GMM', Offical_GMM),
+        ('my_spectral', my_spectral_cluster),
         ('SpectralClustering', spectral),
         # ('MiniBatchKMeans', two_means),
         # ('AffinityPropagation', affinity_propagation),
