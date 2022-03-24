@@ -4,7 +4,9 @@ from sklearn.neighbors import KDTree
 import scipy
 import matplotlib.pyplot as plt
 
+
 def calculate_distance(point_0, point_1):
+    # 计算两点欧式距离
     distance = np.sqrt(np.power((point_0 - point_1), 2).sum())
     return distance
 
@@ -13,7 +15,7 @@ def calculate_dist_matrix(data):
     n = len(data)
     dist_matrix = np.zeros((n, n))
     for i in range(n):
-        for j in range(i + 1, n):
+        for j in range(i + 1, n):  # 由于距离 是对等的, 这里只需要计算一半矩阵的值就可以了
             dist_matrix[i, j] = dist_matrix[j, i] = calculate_distance(data[i], data[j])
     return dist_matrix
 
@@ -26,8 +28,8 @@ def get_neighbor_graph(data, k):
         index_array = np.argsort(row_item)
         # 前k个, 不能报考值为0的,而第一个是自己和自己的距离,一定是0,所以要让开
         W[i][index_array[1: k + 1]] = 1
-
-    W = (W.T + W) / 2
+    W = (W.T + W)
+    W = np.where(W > 0, 1, 0)
     return W
 
 
@@ -41,7 +43,7 @@ def get_neighbor_graph_by_kdTree(data, k, sigma=1.0):
         _, indexes = kd_tree.query([query], k)
         for j in indexes:
             W[i, j] = np.exp(np.linalg.norm(data[i] - data[j]) / (-2 * sigma * sigma))
-    W = (W.T + W) / 2
+    W = (W.T + W)  # 这里除以2 或者不除以,结果没有影响
     return W
 
 
@@ -60,13 +62,14 @@ class SpectralCluster(object):
 
     def fit(self, data):
         self.W = get_neighbor_graph_by_kdTree(data, k=6)
+        # self.W = get_neighbor_graph(data, k=6)
         self.D = np.diag(np.sum(self.W, axis=1))
         self.L = self.D - self.W
         self.Dn = np.power(np.linalg.matrix_power(self.D, -1), 0.5)
-        self.Lsym = np.dot(np.dot(self.Dn,self.L), self.Dn)
+        self.Lsym = np.dot(np.dot(self.Dn, self.L), self.Dn)
 
         if self.need_normalize:
-            _, self.V = scipy.linalg.eigh(self.Lsym, eigvals=(0, self.n_clusters-1))
+            _, self.V = scipy.linalg.eigh(self.Lsym, eigvals=(0, self.n_clusters - 1))
         else:
             _, self.V = scipy.linalg.eigh(self.L, eigvals=(0, self.n_clusters - 1))
         kmeans = cluster.KMeans(n_clusters=self.n_clusters)
@@ -75,6 +78,7 @@ class SpectralCluster(object):
 
     def predict(self, data):
         return self.results
+
 
 # 生成仿真数据
 def generate_X(true_Mu, true_Var):
@@ -110,5 +114,3 @@ if __name__ == '__main__':
     cat = spect.predict(X)
     print(cat)
     # 初始化
-
-

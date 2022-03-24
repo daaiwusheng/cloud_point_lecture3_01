@@ -141,15 +141,15 @@ for i_dataset, (dataset, algo_params) in enumerate(datasets):
         ('GMM', Offical_GMM),
         ('my_spectral', my_spectral_cluster),
         ('SpectralClustering', spectral),
-        # ('MiniBatchKMeans', two_means),
-        # ('AffinityPropagation', affinity_propagation),
-        # ('MeanShift', ms),
-        # ('Ward', ward),
-        # ('AgglomerativeClustering', average_linkage),
-        # ('DBSCAN', dbscan),
-        # ('OPTICS', optics),
-        # ('Birch', birch),
-        # ('GaussianMixture', gmm)
+        ('MiniBatchKMeans', two_means),
+        ('AffinityPropagation', affinity_propagation),
+        ('MeanShift', ms),
+        ('Ward', ward),
+        ('AgglomerativeClustering', average_linkage),
+        ('DBSCAN', dbscan),
+        ('OPTICS', optics),
+        ('Birch', birch),
+        ('GaussianMixture', gmm)
     )
 
     # 此处是内层循环，遍历每种算法
